@@ -1,0 +1,8 @@
+<%page args="default_ref, remote_url"/>
+append usr/share/anaconda/interactive-defaults.ks "ostreesetup --nogpg --osname=rock8s --remote=rock8s --url=file:///ostree/repo --ref=${default_ref}"
+append usr/share/anaconda/interactive-defaults.ks "firewall --use-system-defaults"
+
+append usr/share/anaconda/interactive-defaults.ks "%post --erroronfail"
+append usr/share/anaconda/interactive-defaults.ks "ostree remote delete rock8s"
+append usr/share/anaconda/interactive-defaults.ks "ostree remote add --no-gpg-verify rock8s ${remote_url}"
+append usr/share/anaconda/interactive-defaults.ks "%end"

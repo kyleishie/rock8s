@@ -1,0 +1,6 @@
+[rock8s]
+name=Rock8s
+baseurl=http://127.0.0.01:8080/
+enabled=1
+gpgcheck=0
+metadata_expire=1d

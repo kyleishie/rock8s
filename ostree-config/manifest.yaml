@@ -1,0 +1,79 @@
+variables:
+  stream: devel
+  k8s-version: 1.27.1
+
+rojig:
+  name: Rock8s
+  summary: "Rock8s v${k8s-version}-${stream}"
+  license: MIT
+
+ref: rock8s/${basearch}/v${k8s-version}-devel
+
+mutate-os-release: "Rock8s v${k8s-version}-${stream}"
+automatic_version_prefix: "Rock8s v${k8s-version}-${stream}"
+
+include:
+  - rocky-ostree-config/manifest.8-minimal.yaml
+  - manifests/flannel/manifest.yaml
+
+modules:
+  enable:
+    - container-tools:3.0
+
+repos:
+  - docker-ce-stable
+  - kubernetes
+  - rock8s
+
+repo-packages:
+  - repo: docker-ce-stable
+    packages:
+      - containerd.io
+  - repo: kubernetes
+    packages:
+      - kubelet
+      - kubeadm
+      - kubectl
+  - repo: rock8s
+    packages:
+      - kube-images
+      - machine-id-hostname
+
+units:
+  - swapoff.service
+  - sshd.service
+  - containerd.service
+  - kubelet.service
+  - kube-images.service
+  - machine-id-hostname.service
+
+
+add-files: [
+  ["add-files/usr/lib/systemd/system/swapoff.service", "/usr/lib/systemd/system/swapoff.service"],
+  ["add-files/etc/containerd/config.toml", "/etc/containerd/config.toml"],
+  ["add-files/etc/modules-load.d/k8s.conf", "/etc/modules-load.d/k8s.conf"],
+  ["add-files/etc/sysctl.d/k8s.conf", "/etc/sysctl.d/k8s.conf"],
+  ["add-files/etc/bash_completion.d/kubectl", "/etc/bash_completion.d/kubectl"],
+  ["add-files/etc/environment", "/etc/environment"],
+  ["add-files/etc/profile", "/etc/profile"],
+]
+
+postprocess:
+  - |
+    #!/usr/bin/env bash
+
+    # create this directory or kube-controller-manager will fail to create on mount
+    mkdir -p /usr/libexec/kubernetes/kubelet-plugins/volume/exec
+
+    # Set SELinux to permissive mode
+    sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+
+    # Setup Firewall
+    firewall-offline-cmd --add-port=6443/tcp
+    firewall-offline-cmd --add-port=2379-2380/tcp
+    firewall-offline-cmd --add-port=10250/tcp
+    firewall-offline-cmd --add-port=10259/tcp
+    firewall-offline-cmd --add-port=10257/tcp
+    firewall-offline-cmd --add-port=30000-32767/tcp
+
+    chmod a+r /etc/bash_completion.d/kubectl

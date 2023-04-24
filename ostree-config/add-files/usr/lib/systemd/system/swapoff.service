@@ -1,0 +1,11 @@
+[Unit]
+Description=Disables all swaps if any (just in case)
+Before=kubelet.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/bash -c "swapoff -a"
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,3 @@
+[submodule "ostree-config/ostree-config"]
+	path = ostree-config/rocky-ostree-config
+	url = https://git.resf.org/sig_ostree/ostree-config.git
