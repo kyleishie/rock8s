@@ -17,6 +17,7 @@ Requires:   grep
 %install
 
 # install systemd unit to ctr image import on boot
+# FIXME: This isn't working
 mkdir -p %{buildroot}/usr/lib/systemd/system/
 cat << EOF >>%{buildroot}/usr/lib/systemd/system/machine-id-hostname.service
 [Unit]
